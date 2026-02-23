@@ -73,8 +73,7 @@ export function useActivityLogs() {
         // Polling setiap 30 detik
         const interval = setInterval(loadLogs, 30000);
         return () => clearInterval(interval);
-
-    }, [driveToken, user]);
+    }, [driveToken, user?.uid]);
 
     return { logs, loading, usingFallback };
 }
