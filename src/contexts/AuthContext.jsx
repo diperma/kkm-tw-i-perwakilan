@@ -1,0 +1,117 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+    onAuthStateChanged,
+    signInWithPopup,
+    GoogleAuthProvider,
+    signOut
+} from 'firebase/auth';
+import { auth } from '../firebase';
+
+const AuthContext = createContext(null);
+
+export function useAuth() {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+}
+
+export function AuthProvider({ children }) {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [driveToken, setDriveToken] = useState(null);
+
+    useEffect(() => {
+        let unsubscribe;
+        try {
+            unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+                setUser(firebaseUser);
+                setLoading(false);
+            }, (error) => {
+                console.error("Auth state error:", error);
+                setLoading(false);
+            });
+        } catch (error) {
+            console.error("Firebase auth initialization error:", error);
+            setLoading(false);
+        }
+
+        const timeout = setTimeout(() => {
+            if (loading) {
+                console.warn('Firebase auth timeout');
+                setLoading(false);
+            }
+        }, 3000);
+
+        return () => {
+            if (unsubscribe) unsubscribe();
+            clearTimeout(timeout);
+        };
+    }, []);
+
+    const loginWithGoogle = async () => {
+        const provider = new GoogleAuthProvider();
+        // Request Google Drive readonly scope & Activity log scope
+        provider.addScope('https://www.googleapis.com/auth/drive.readonly');
+        provider.addScope('https://www.googleapis.com/auth/drive.activity.readonly');
+
+        try {
+            const result = await signInWithPopup(auth, provider);
+
+            // Extract Google API Access Token
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            if (credential?.accessToken) {
+                setDriveToken(credential.accessToken);
+                // Also store slightly persistently in session storage in case of page reload 
+                // until Firebase Auth automatically refreshes (which doesn't give us the Google token back easily)
+                sessionStorage.setItem('driveToken', credential.accessToken);
+            }
+
+            return result.user;
+        } catch (error) {
+            console.error('Login failed:', error);
+            throw error;
+        }
+    };
+
+    const loginAsGuest = () => {
+        setUser({
+            uid: 'guest-123',
+            displayName: 'Guest Worker',
+            email: 'demo@monidrive.local',
+            photoURL: null
+        });
+    };
+
+    const logout = async () => {
+        try {
+            if (user?.uid === 'guest-123') {
+                setUser(null);
+                setDriveToken(null);
+                return;
+            }
+            await signOut(auth);
+            setDriveToken(null);
+            sessionStorage.removeItem('driveToken');
+        } catch (error) {
+            console.error('Logout failed:', error);
+            throw error;
+        }
+    };
+
+    const value = {
+        user,
+        loading,
+        driveToken: driveToken || sessionStorage.getItem('driveToken'),
+        loginWithGoogle,
+        loginAsGuest,
+        logout,
+    };
+
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    );
+}
