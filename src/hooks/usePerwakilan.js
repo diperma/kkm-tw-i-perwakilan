@@ -29,10 +29,22 @@ export function usePerwakilan() {
             // Asumsi: Nama folder/file di Drive mengandung nama Perwakilan.
             const mappedPromises = PERWAKILAN_DATA.map(async pw => {
                 // Cari file/folder yang namanya mirip dengan nama perwakilan
-                // Ini pencarian sederhana (case-insensitive include)
-                const matchedFile = files.find(f =>
-                    f.name.toLowerCase().includes(pw.name.toLowerCase())
-                );
+                // Perbaikan: gunakan Regex strict bounds untuk membedakan Papua, Papua Barat, Papua Barat Daya dll
+                const matchedFile = files.find(f => {
+                    const folderName = f.name.toLowerCase();
+                    const pwName = pw.name.toLowerCase();
+
+                    // Jika ini Papua Barat, pastikan tidak mengandung "Daya"
+                    if (pwName === 'papua barat' && folderName.includes('daya')) {
+                        return false;
+                    }
+                    // Jika ini sekadar Papua, pastikan tidak mengandung "Barat", "Tengah", "Selatan", "Pegunungan" dll
+                    if (pwName === 'papua' && (folderName.includes('barat') || folderName.includes('tengah') || folderName.includes('selatan') || folderName.includes('pegunungan'))) {
+                        return false;
+                    }
+
+                    return folderName.includes(pwName);
+                });
 
                 if (matchedFile) {
                     // Validasi: Apakah folder ini memiliki file di dalamnya?
