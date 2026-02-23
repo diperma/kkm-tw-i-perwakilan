@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { FolderOpen, LogIn, Loader2, AlertTriangle, Shield } from 'lucide-react';
+
 import { useAuth } from '../contexts/AuthContext';
-import { FolderOpen, LogIn, Loader2, AlertTriangle, Shield, UserCircle } from 'lucide-react';
 
 export default function LoginPage() {
-    const { user, loginWithGoogle, loginAsGuest } = useAuth();
+    const { user, loginWithGoogle } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -102,14 +103,7 @@ export default function LoginPage() {
                         )}
                     </button>
 
-                    <button
-                        onClick={loginAsGuest}
-                        disabled={isLoading}
-                        className="w-full mt-4 flex items-center justify-center space-x-3 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
-                    >
-                        <UserCircle className="w-5 h-5 text-blue-300" />
-                        <span>Masuk sebagai Guest (Demo Mode)</span>
-                    </button>
+
 
                     {/* Divider */}
                     <div className="relative my-6">

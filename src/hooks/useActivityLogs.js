@@ -13,9 +13,9 @@ export function useActivityLogs() {
         const loadLogs = async () => {
             setLoading(true);
 
-            if (user?.uid === 'guest-123' || !driveToken) {
-                setLogs(getFallbackActivityLogs());
-                setUsingFallback(true);
+            if (!driveToken) {
+                setLogs([]);
+                setUsingFallback(false);
                 setLoading(false);
                 return;
             }
@@ -56,13 +56,13 @@ export function useActivityLogs() {
                     setLogs(formattedLogs);
                     setUsingFallback(false);
                 } else {
-                    setLogs(getFallbackActivityLogs());
-                    setUsingFallback(true);
+                    setLogs([]);
+                    setUsingFallback(false);
                 }
             } catch (err) {
                 console.error('Failed fetching drive activity:', err);
-                setLogs(getFallbackActivityLogs());
-                setUsingFallback(true);
+                setLogs([]);
+                setUsingFallback(false);
             } finally {
                 setLoading(false);
             }
