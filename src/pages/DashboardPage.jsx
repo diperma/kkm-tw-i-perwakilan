@@ -698,20 +698,22 @@ export default function DashboardPage() {
                                                         {item.uploadedKabKota &&
                                                             item.uploadedKabKota.length > 0 ? (
                                                             <div className="flex flex-wrap gap-1 max-w-xs">
-                                                                <a
-                                                                    key={idx}
-                                                                    href={`https://docs.google.com/spreadsheets/d/${kabkota.id}/edit`}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    title={`Buka file ${kabkota.name}`}
-                                                                    className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 hover:text-blue-700 transition-colors"
-                                                                    style={{
-                                                                        whiteSpace: "normal",
-                                                                        wordBreak: "break-word",
-                                                                    }}
-                                                                >
-                                                                    {kabkota.name}
-                                                                </a>
+                                                                {item.uploadedKabKota.map((kabkota, idx) => (
+                                                                    <a
+                                                                        key={idx}
+                                                                        href={`https://docs.google.com/spreadsheets/d/${kabkota.id}/edit`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        title={`Buka file ${kabkota.name}`}
+                                                                        className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 hover:text-blue-700 transition-colors"
+                                                                        style={{
+                                                                            whiteSpace: "normal",
+                                                                            wordBreak: "break-word",
+                                                                        }}
+                                                                    >
+                                                                        {kabkota.name}
+                                                                    </a>
+                                                                ))}
                                                             </div>
                                                         ) : (
                                                             <span className="text-slate-400 text-xs italic">
