@@ -157,7 +157,6 @@ export async function fetchPersonName(accessToken, personName) {
                 const data = await response.json();
                 const displayName = data.names?.[0]?.displayName;
                 if (displayName) {
-                    console.log(`[PersonAPI] ✅ ${personName} → ${displayName}`);
                     return displayName;
                 }
             } else {

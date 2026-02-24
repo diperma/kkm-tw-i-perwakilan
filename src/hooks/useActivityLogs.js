@@ -44,14 +44,11 @@ export function useActivityLogs() {
 
                     let userName = 'Kontributor';
                     const actor = act.actors?.[0];
-                    // Debug: lihat struktur actor dari API
-                    console.log('[ActivityLog] Actor:', JSON.stringify(actor, null, 2));
 
                     if (actor?.user?.knownUser?.isCurrentUser) {
                         userName = user?.displayName || 'Anda';
                     } else if (actor?.user?.knownUser?.personName) {
                         userName = await fetchPersonName(driveToken, actor.user.knownUser.personName);
-                        console.log('[ActivityLog] Resolved personName:', actor.user.knownUser.personName, '→', userName);
                     } else if (actor?.user?.deletedUser) {
                         userName = 'Pengguna dihapus';
                     } else if (actor?.user?.unknownUser) {
