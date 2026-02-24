@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 export default function ProtectedRoute({ children }) {
-    const { user, loading, driveToken } = useAuth();
+    const { user, loading } = useAuth();
 
     if (loading) {
         return (
@@ -17,7 +17,7 @@ export default function ProtectedRoute({ children }) {
         );
     }
 
-    if (!user || (!driveToken && !sessionStorage.getItem('driveToken'))) {
+    if (!user) {
         return <Navigate to="/login" replace />;
     }
 

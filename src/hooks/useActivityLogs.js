@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchDriveActivity } from '../services/driveService';
+import { fetchDriveActivity, fetchPersonName } from '../services/driveService';
 import { getFallbackActivityLogs } from '../services/firestoreService';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -23,7 +23,7 @@ export function useActivityLogs() {
             try {
                 const activities = await fetchDriveActivity(driveToken);
 
-                const formattedLogs = activities.map(act => {
+                const formattedLogsPromises = activities.map(async act => {
                     const actionDetail = act.primaryActionDetail;
                     let action = 'unknown';
                     if (actionDetail.create) action = 'upload';
@@ -42,15 +42,33 @@ export function useActivityLogs() {
                     const pwMatch = fileName.match(/PW\d{2}/i);
                     const pwId = pwMatch ? pwMatch[0].toUpperCase() : 'Drive';
 
+                    let userName = 'Kontributor';
+                    const actor = act.actors?.[0];
+                    // Debug: lihat struktur actor dari API
+                    console.log('[ActivityLog] Actor:', JSON.stringify(actor, null, 2));
+
+                    if (actor?.user?.knownUser?.isCurrentUser) {
+                        userName = user?.displayName || 'Anda';
+                    } else if (actor?.user?.knownUser?.personName) {
+                        userName = await fetchPersonName(driveToken, actor.user.knownUser.personName);
+                        console.log('[ActivityLog] Resolved personName:', actor.user.knownUser.personName, '→', userName);
+                    } else if (actor?.user?.deletedUser) {
+                        userName = 'Pengguna dihapus';
+                    } else if (actor?.user?.unknownUser) {
+                        userName = 'Pengguna tidak dikenal';
+                    }
+
                     return {
                         id: act.timestamp || Math.random().toString(),
                         pwId,
-                        user: 'Kontributor',
+                        user: userName,
                         action,
                         file: fileName,
                         time: act.timestamp ? formatRelativeTime(new Date(act.timestamp)) : 'Baru saja'
                     };
                 });
+
+                const formattedLogs = await Promise.all(formattedLogsPromises);
 
                 if (formattedLogs.length > 0) {
                     setLogs(formattedLogs);
@@ -79,20 +97,11 @@ export function useActivityLogs() {
 }
 
 function formatRelativeTime(date) {
-    const now = new Date();
-    const diff = now - date;
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const day = date.getDate();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const month = months[date.getMonth()];
 
-    if (minutes < 1) return 'Baru saja';
-    if (minutes < 60) return `${minutes} menit yang lalu`;
-    if (hours < 24) return `${hours} jam yang lalu`;
-    if (days < 7) return `${days} hari yang lalu`;
-
-    return date.toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-    });
+    return `${hours}.${minutes} ${day} ${month}`;
 }

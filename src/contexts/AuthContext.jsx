@@ -55,6 +55,8 @@ export function AuthProvider({ children }) {
         // Request Google Drive readonly scope & Activity log scope
         provider.addScope('https://www.googleapis.com/auth/drive.readonly');
         provider.addScope('https://www.googleapis.com/auth/drive.activity.readonly');
+        // Scope to fetch user profile names from People API (directory lookup for Workspace users)
+        provider.addScope('https://www.googleapis.com/auth/directory.readonly');
 
         try {
             const result = await signInWithPopup(auth, provider);

@@ -2,11 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import {
     fetchDriveContents,
-    checkIfFolderHasFiles,
+    fetchFilesInsideFolder,
 } from "../services/driveService";
-import {
-    PERWAKILAN_DATA,
-} from "../services/firestoreService";
+import { PERWAKILAN_DATA } from "../services/firestoreService";
 
 export function usePerwakilan() {
     const { driveToken, user } = useAuth();
@@ -59,11 +57,39 @@ export function usePerwakilan() {
 
                 if (matchedFile) {
                     // Validasi: Apakah folder ini memiliki file di dalamnya?
-                    const hasFiles = await checkIfFolderHasFiles(
+                    const innerFiles = await fetchFilesInsideFolder(
                         driveToken,
                         matchedFile.id,
                     );
-                    if (hasFiles) {
+
+                    if (innerFiles && innerFiles.length > 0) {
+                        // Ekstrak nama Kab/Kota dari nama file
+                        // Asumsi format: "Kertas Kerja - Kab. Bandung.xlsx" -> "Kab. Bandung"
+                        const uploadedKabKota = innerFiles
+                            .map((f) => {
+                                let name = f.name;
+                                // Bersihkan ekstensi rilis
+                                name = name.replace(
+                                    /\.(xlsx|xls|csv|pdf|doc|docx|zip|rar)$/i,
+                                    "",
+                                );
+                                // Bersihkan teks umum jika ada
+                                name = name.replace(/kertas\s*kerja\s*(-|_)?\s*/i, "");
+                                name = name.replace(/tw\s*(i|1|satu)\s*(-|_)?\s*/i, "");
+
+                                const cleanName = name.trim();
+                                // Resolve ID: jika file adalah shortcut, gunakan targetId
+                                const isShortcut = f.mimeType === "application/vnd.google-apps.shortcut";
+                                const resolvedId = isShortcut && f.shortcutDetails?.targetId
+                                    ? f.shortcutDetails.targetId
+                                    : f.id;
+                                const resolvedMimeType = isShortcut && f.shortcutDetails?.targetMimeType
+                                    ? f.shortcutDetails.targetMimeType
+                                    : f.mimeType;
+                                return cleanName ? { id: resolvedId, name: cleanName, mimeType: resolvedMimeType } : null;
+                            })
+                            .filter(Boolean);
+
                         return {
                             ...pw,
                             status: "submitted",
@@ -73,6 +99,7 @@ export function usePerwakilan() {
                             ).toLocaleDateString("id-ID"),
                             driveFileId: matchedFile.id,
                             driveFileName: matchedFile.name,
+                            uploadedKabKota: uploadedKabKota,
                         };
                     }
                 }
@@ -84,6 +111,7 @@ export function usePerwakilan() {
                     lastUpdated: null,
                     driveFileId: matchedFile?.id || null, // Membantu fitur fallback tapi status tetep missing
                     driveFileName: matchedFile?.name || null,
+                    uploadedKabKota: [],
                 };
             });
 
