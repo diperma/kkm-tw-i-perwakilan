@@ -38,20 +38,41 @@ import {
  * Lainnya    → drive.google.com/file/d/{id}/view
  */
 function getGoogleFileUrl(fileId, mimeType) {
-    switch (mimeType) {
-        case "application/vnd.google-apps.spreadsheet":
-            return `https://docs.google.com/spreadsheets/d/${fileId}/edit`;
-        case "application/vnd.google-apps.document":
-            return `https://docs.google.com/document/d/${fileId}/edit`;
-        case "application/vnd.google-apps.presentation":
-            return `https://docs.google.com/presentation/d/${fileId}/edit`;
-        case "application/vnd.google-apps.form":
-            return `https://docs.google.com/forms/d/${fileId}/edit`;
-        case "application/vnd.google-apps.drawing":
-            return `https://docs.google.com/drawings/d/${fileId}/edit`;
-        default:
-            return `https://drive.google.com/file/d/${fileId}/view`;
+    // Google native types
+    const sheetsTypes = [
+        "application/vnd.google-apps.spreadsheet",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+        "application/vnd.ms-excel", // .xls
+        "text/csv",
+    ];
+    const docsTypes = [
+        "application/vnd.google-apps.document",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+        "application/msword", // .doc
+    ];
+    const slidesTypes = [
+        "application/vnd.google-apps.presentation",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation", // .pptx
+        "application/vnd.ms-powerpoint", // .ppt
+    ];
+
+    if (sheetsTypes.includes(mimeType)) {
+        return `https://docs.google.com/spreadsheets/d/${fileId}/edit`;
     }
+    if (docsTypes.includes(mimeType)) {
+        return `https://docs.google.com/document/d/${fileId}/edit`;
+    }
+    if (slidesTypes.includes(mimeType)) {
+        return `https://docs.google.com/presentation/d/${fileId}/edit`;
+    }
+    if (mimeType === "application/vnd.google-apps.form") {
+        return `https://docs.google.com/forms/d/${fileId}/edit`;
+    }
+    if (mimeType === "application/vnd.google-apps.drawing") {
+        return `https://docs.google.com/drawings/d/${fileId}/edit`;
+    }
+    // PDF & lainnya → Drive file view
+    return `https://drive.google.com/file/d/${fileId}/view`;
 }
 
 export default function DashboardPage() {
