@@ -20,7 +20,8 @@ export function useAuth() {
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [driveToken, setDriveToken] = useState(null);
+    // Langsung baca dari localStorage saat init agar tidak ada flash 'token null' saat halaman di-refresh
+    const [driveToken, setDriveToken] = useState(() => localStorage.getItem('driveToken'));
 
     useEffect(() => {
         let unsubscribe;

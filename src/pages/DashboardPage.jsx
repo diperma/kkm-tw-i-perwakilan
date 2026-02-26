@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 
 export default function DashboardPage() {
-    const { user, logout, driveToken } = useAuth();
+    const { user, logout, driveToken, loading: authLoading } = useAuth();
     const {
         data: perwakilanData,
         loading: dataLoading,
@@ -145,7 +145,8 @@ export default function DashboardPage() {
 
     const maxRegionTotal = Math.max(...regionGroups.map((g) => g.total), 1);
 
-    if (dataLoading) {
+    // Tunggu auth selesai dulu (termasuk restore token dari localStorage)
+    if (authLoading || dataLoading) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
                 <div className="text-center animate-fade-in">
@@ -158,8 +159,8 @@ export default function DashboardPage() {
         );
     }
 
-    // Jika user login tapi driveToken tidak ada (session expired), tampilkan prompt reconnect
-    if (!driveToken) {
+    // Hanya tampilkan 'sesi berakhir' jika auth sudah selesai loading DAN token memang tidak ada
+    if (!authLoading && !driveToken) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
                 <div className="text-center animate-fade-in max-w-md mx-auto p-8">
