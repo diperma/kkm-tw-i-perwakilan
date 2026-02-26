@@ -65,9 +65,9 @@ export function AuthProvider({ children }) {
             const credential = GoogleAuthProvider.credentialFromResult(result);
             if (credential?.accessToken) {
                 setDriveToken(credential.accessToken);
-                // Also store slightly persistently in session storage in case of page reload 
-                // until Firebase Auth automatically refreshes (which doesn't give us the Google token back easily)
-                sessionStorage.setItem('driveToken', credential.accessToken);
+                // Ganti ke localStorage agar sesi token bisa persisten meski tab ditutup 
+                // (Catatan: OAuth token Google memiliki natural expiry 1 jam, tapi tidak akan hilang jika page di-refresh)
+                localStorage.setItem('driveToken', credential.accessToken);
             }
 
             return result.user;
@@ -95,7 +95,7 @@ export function AuthProvider({ children }) {
             }
             await signOut(auth);
             setDriveToken(null);
-            sessionStorage.removeItem('driveToken');
+            localStorage.removeItem('driveToken');
         } catch (error) {
             console.error('Logout failed:', error);
             throw error;
@@ -105,7 +105,7 @@ export function AuthProvider({ children }) {
     const value = {
         user,
         loading,
-        driveToken: driveToken || sessionStorage.getItem('driveToken'),
+        driveToken: driveToken || localStorage.getItem('driveToken'),
         loginWithGoogle,
         loginAsGuest,
         logout,
