@@ -30,6 +30,30 @@ import {
     FileText,
 } from "lucide-react";
 
+/**
+ * Mengembalikan URL Google yang sesuai berdasarkan mimeType file.
+ * Spreadsheet → docs.google.com/spreadsheets/d/{id}/edit
+ * Document   → docs.google.com/document/d/{id}/edit
+ * Presentation → docs.google.com/presentation/d/{id}/edit
+ * Lainnya    → drive.google.com/file/d/{id}/view
+ */
+function getGoogleFileUrl(fileId, mimeType) {
+    switch (mimeType) {
+        case "application/vnd.google-apps.spreadsheet":
+            return `https://docs.google.com/spreadsheets/d/${fileId}/edit`;
+        case "application/vnd.google-apps.document":
+            return `https://docs.google.com/document/d/${fileId}/edit`;
+        case "application/vnd.google-apps.presentation":
+            return `https://docs.google.com/presentation/d/${fileId}/edit`;
+        case "application/vnd.google-apps.form":
+            return `https://docs.google.com/forms/d/${fileId}/edit`;
+        case "application/vnd.google-apps.drawing":
+            return `https://docs.google.com/drawings/d/${fileId}/edit`;
+        default:
+            return `https://drive.google.com/file/d/${fileId}/view`;
+    }
+}
+
 export default function DashboardPage() {
     const { user, logout, driveToken, loading: authLoading } = useAuth();
     const {
@@ -702,7 +726,7 @@ export default function DashboardPage() {
                                                                 {item.uploadedKabKota.map((kabkota, idx) => (
                                                                     <a
                                                                         key={idx}
-                                                                        href={`https://docs.google.com/spreadsheets/d/${kabkota.id}/edit`}
+                                                                        href={getGoogleFileUrl(kabkota.id, kabkota.mimeType)}
                                                                         target="_blank"
                                                                         rel="noopener noreferrer"
                                                                         title={`Buka file ${kabkota.name}`}
@@ -811,7 +835,7 @@ export default function DashboardPage() {
                                                             {item.uploadedKabKota.map((kabkota, idx) => (
                                                                 <a
                                                                     key={idx}
-                                                                    href={`https://docs.google.com/spreadsheets/d/${kabkota.id}/edit`}
+                                                                    href={getGoogleFileUrl(kabkota.id, kabkota.mimeType)}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     title={`Buka file ${kabkota.name}`}
