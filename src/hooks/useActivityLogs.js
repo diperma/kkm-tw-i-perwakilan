@@ -37,9 +37,16 @@ export function useActivityLogs() {
                     }
 
                     const fileName = targetItem?.title || 'Folder Perwakilan';
-                    const mimeType = targetItem?.mimeType || '';
-                    const rawName = targetItem?.name || '';
-                    const fileId = rawName.startsWith('items/') ? rawName.replace('items/', '') : rawName;
+
+                    let mimeType = targetItem?.mimeType || '';
+                    let rawName = targetItem?.name || '';
+                    let fileId = rawName.startsWith('items/') ? rawName.replace('items/', '') : rawName;
+
+                    // If it is a shortcut, use the actual target's details
+                    if (mimeType === 'application/vnd.google-apps.shortcut' && targetItem?.shortcutDetails) {
+                        mimeType = targetItem.shortcutDetails.targetMimeType || mimeType;
+                        fileId = targetItem.shortcutDetails.targetId || fileId;
+                    }
 
                     // Coba mencari ID PW, misal 'PW01' di nama file
                     const pwMatch = fileName.match(/PW\d{2}/i);
