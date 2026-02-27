@@ -37,6 +37,9 @@ export function useActivityLogs() {
                     }
 
                     const fileName = targetItem?.title || 'Folder Perwakilan';
+                    const mimeType = targetItem?.mimeType || '';
+                    const rawName = targetItem?.name || '';
+                    const fileId = rawName.startsWith('items/') ? rawName.replace('items/', '') : rawName;
 
                     // Coba mencari ID PW, misal 'PW01' di nama file
                     const pwMatch = fileName.match(/PW\d{2}/i);
@@ -61,6 +64,8 @@ export function useActivityLogs() {
                         user: userName,
                         action,
                         file: fileName,
+                        fileId,
+                        mimeType,
                         time: act.timestamp ? formatRelativeTime(new Date(act.timestamp)) : 'Baru saja'
                     };
                 });

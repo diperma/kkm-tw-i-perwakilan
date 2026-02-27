@@ -558,9 +558,21 @@ export default function DashboardPage() {
                                                                 {log.time}
                                                             </span>
                                                         </div>
-                                                        <p className="text-sm font-bold text-slate-900 bg-white px-3 py-2 rounded border border-slate-200 mt-1 inline-block shadow-sm">
-                                                            {log.file}
-                                                        </p>
+                                                        {log.fileId ? (
+                                                            <a
+                                                                href={getGoogleFileUrl(log.fileId, log.mimeType)}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-sm font-bold text-blue-600 hover:text-blue-800 hover:bg-slate-50 bg-white px-3 py-2 rounded border border-slate-200 mt-1 inline-block shadow-sm transition-colors cursor-pointer"
+                                                                title={`Buka ${log.file}`}
+                                                            >
+                                                                {log.file}
+                                                            </a>
+                                                        ) : (
+                                                            <p className="text-sm font-bold text-slate-900 bg-white px-3 py-2 rounded border border-slate-200 mt-1 inline-block shadow-sm">
+                                                                {log.file}
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 </div>
                                             );
