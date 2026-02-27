@@ -71,11 +71,8 @@ function getGoogleFileUrl(fileId, mimeType) {
     if (mimeType === "application/vnd.google-apps.drawing") {
         return `https://docs.google.com/drawings/d/${fileId}/edit`;
     }
-    if (mimeType === "application/vnd.google-apps.shortcut") {
-        return `https://drive.google.com/open?id=${fileId}`;
-    }
-    // PDF & lainnya → Drive file view
-    return `https://drive.google.com/file/d/${fileId}/view`;
+    // Shortcut, PDF, & lainnya → buka otomatis di ekosistem Google
+    return `https://drive.google.com/open?id=${fileId}`;
 }
 
 export default function DashboardPage() {
